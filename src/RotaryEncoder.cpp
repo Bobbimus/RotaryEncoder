@@ -23,6 +23,7 @@
 // a 1 for the entries where the position was incremented
 // and 0 in all the other (no change or not valid) cases.
 
+
 const int8_t KNOBDIR[] = {
     0, -1, 1, 0,
     1, 0, 0, -1,
@@ -92,7 +93,7 @@ void RotaryEncoder::setPosition(long newPosition)
   case LatchMode::FOUR3:
   case LatchMode::FOUR0:
     // only adjust the external part of the position.
-    _position = ((newPosition << 2) | (_position & 0x03L));
+    _position = ((newPosition << 2) | (_position & 0x03L))/add;
     _positionExt = newPosition;
     _positionExtPrev = newPosition;
     break;
@@ -107,6 +108,10 @@ void RotaryEncoder::setPosition(long newPosition)
 
 } // setPosition()
 
+void RotaryEncoder::setStep(int8_t setadd)
+{
+	add = setadd;
+} // setStep
 
 void RotaryEncoder::tick(void)
 {
@@ -115,14 +120,15 @@ void RotaryEncoder::tick(void)
   int8_t thisState = sig1 | (sig2 << 1);
 
   if (_oldState != thisState) {
-    _position += KNOBDIR[thisState | (_oldState << 2)];
+    _position += (KNOBDIR[thisState | (_oldState << 2)]);
+	Serial.println(_position);
     _oldState = thisState;
 
     switch (_mode) {
     case LatchMode::FOUR3:
       if (thisState == LATCH3) {
         // The hardware has 4 steps with a latch on the input state 3
-        _positionExt = _position >> 2;
+        _positionExt = (_position >> 2)*add;
         _positionExtTimePrev = _positionExtTime;
         _positionExtTime = millis();
       }
@@ -148,6 +154,8 @@ void RotaryEncoder::tick(void)
     } // switch
   } // if
 } // tick()
+
+
 
 
 unsigned long RotaryEncoder::getMillisBetweenRotations() const

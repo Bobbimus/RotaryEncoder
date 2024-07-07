@@ -46,10 +46,13 @@ public:
 
   // adjust the current position
   void setPosition(long newPosition);
+    
+  // adjust the steps
+  void setStep(int8_t setadd);
 
   // call this function every some milliseconds or by using an interrupt for handling state changes of the rotary encoder.
   void tick(void);
-
+  
   // Returns the time in milliseconds between the current observed
   unsigned long getMillisBetweenRotations() const;
 
@@ -58,7 +61,7 @@ public:
 
 private:
   int _pin1, _pin2; // Arduino pins used for the encoder.
-  
+  int8_t add = 1;
   LatchMode _mode; // Latch mode from initialization
 
   volatile int8_t _oldState;
